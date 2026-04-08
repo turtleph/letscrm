@@ -1,139 +1,381 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Gravador de Áudio</title>
+<title>Gravador</title>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:#0b141a;font-family:'Segoe UI',sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;overflow:hidden}
-  .wrap{display:flex;flex-direction:column;align-items:center;gap:20px;padding:24px;width:100%}
-  .timer{font-size:28px;font-weight:300;color:#e9edef;letter-spacing:4px;font-variant-numeric:tabular-nums;min-height:38px}
-  .waveform{display:flex;align-items:center;gap:3px;height:48px;width:260px;justify-content:center}
-  .bar{width:4px;border-radius:3px;background:#00a884;transition:height .08s;min-height:4px}
-  .controls{display:flex;align-items:center;gap:16px;margin-top:4px}
-  .btn{border:none;cursor:pointer;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:opacity .15s,transform .1s;outline:none}
-  .btn:active{transform:scale(.93)}
-  .btn-cancel{width:48px;height:48px;background:rgba(255,255,255,.12);color:#e9edef;font-size:20px}
-  .btn-record{width:64px;height:64px;background:#f02849;font-size:28px}
-  .btn-stop{width:64px;height:64px;background:#00a884;font-size:24px}
-  .btn-send{width:48px;height:48px;background:#00a884;color:#fff;font-size:20px}
-  .status{font-size:13px;color:#8696a0;text-align:center;min-height:18px}
-  .preview{width:100%;max-width:280px}
-  audio{width:100%;outline:none;height:36px;border-radius:8px}
-  .hidden{display:none!important}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0b141a;display:flex;align-items:center;justify-content:center;overflow:hidden;font-family:'Segoe UI',sans-serif}
+
+.recorder{
+  display:flex;align-items:center;gap:0;
+  background:#1f2c33;border-radius:28px;
+  padding:8px 10px 8px 8px;
+  width:340px;height:56px;
+  box-shadow:0 2px 12px rgba(0,0,0,.4);
+  position:relative;
+}
+
+/* Botão lixeira / cancelar */
+.btn-trash{
+  width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;
+  background:rgba(255,255,255,.07);color:#8696a0;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  font-size:18px;transition:background .15s;
+}
+.btn-trash:hover{background:rgba(255,255,255,.14)}
+.btn-trash svg{pointer-events:none}
+
+/* Dot gravando */
+.rec-dot{
+  width:10px;height:10px;border-radius:50%;background:#f02849;
+  flex-shrink:0;margin:0 8px;
+  animation:blink 1s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.rec-dot.paused{animation:none;opacity:.5}
+
+/* Timer */
+.timer{
+  font-size:15px;color:#e9edef;font-variant-numeric:tabular-nums;
+  letter-spacing:.5px;flex-shrink:0;min-width:34px;margin-right:6px;
+}
+
+/* Waveform */
+.waveform{
+  flex:1;height:34px;display:flex;align-items:center;
+  gap:2px;overflow:hidden;position:relative;cursor:pointer;
+}
+.bar{
+  width:3px;border-radius:2px;background:#00a884;
+  flex-shrink:0;transition:height .07s,opacity .07s;min-height:3px;
+}
+/* waveform no modo preview — barras estáticas cinzas com progresso verde */
+.waveform.preview .bar{background:#8696a0}
+.waveform.preview .bar.played{background:#00a884}
+
+/* Botão mic (fica visível só no estado inicial, vira pausa durante gravação) */
+.btn-mic{
+  width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;
+  background:rgba(255,255,255,.07);color:#8696a0;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  font-size:18px;transition:background .15s;margin-left:4px;
+}
+.btn-mic:hover{background:rgba(255,255,255,.12)}
+
+/* Botão velocidade */
+.btn-speed{
+  width:34px;height:34px;border-radius:50%;border:none;cursor:pointer;
+  background:rgba(255,255,255,.07);color:#e9edef;font-size:12px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  margin-left:4px;transition:background .15s;letter-spacing:-.5px;
+}
+.btn-speed:hover{background:rgba(255,255,255,.12)}
+
+/* Botão play/pause preview */
+.btn-play{
+  width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;
+  background:rgba(255,255,255,.07);color:#e9edef;font-size:18px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  margin-left:4px;transition:background .15s;
+}
+.btn-play:hover{background:rgba(255,255,255,.12)}
+
+/* Botão enviar */
+.btn-send{
+  width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;
+  background:#00a884;color:#fff;font-size:20px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  margin-left:6px;transition:background .15s,transform .1s;box-shadow:0 2px 8px rgba(0,168,132,.35);
+}
+.btn-send:hover{background:#017a62}
+.btn-send:active{transform:scale(.93)}
+
+.hidden{display:none!important}
+
+/* Estado inicial — só o botão de gravar centralizado */
+.start-wrap{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+}
+.btn-start{
+  width:60px;height:60px;border-radius:50%;border:none;cursor:pointer;
+  background:#f02849;color:#fff;font-size:26px;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s,transform .1s;box-shadow:0 2px 12px rgba(240,40,73,.4);
+}
+.btn-start:hover{background:#c81f3a}
+.btn-start:active{transform:scale(.93)}
+.start-label{font-size:12px;color:#8696a0}
+
+body.recording .start-wrap{display:none}
+body.recording .recorder{display:flex}
+body.preview-mode .start-wrap{display:none}
+body.preview-mode .recorder{display:flex}
+.recorder{display:none}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="timer" id="timer">0:00</div>
-  <div class="waveform" id="waveform"></div>
-  <div class="controls">
-    <button class="btn btn-cancel hidden" id="btnCancel" title="Cancelar">✕</button>
-    <button class="btn btn-record" id="btnRecord" title="Gravar">🎤</button>
-    <button class="btn btn-stop hidden" id="btnStop" title="Parar">⏹</button>
-    <button class="btn btn-send hidden" id="btnSend" title="Enviar">▶</button>
-  </div>
-  <div class="preview hidden" id="preview">
-    <audio id="audioPreview" controls></audio>
-  </div>
-  <div class="status" id="status">Toque no microfone para gravar</div>
+
+<!-- Estado inicial -->
+<div class="start-wrap" id="startWrap">
+  <button class="btn-start" id="btnStart">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1a4 4 0 0 1 4 4v7a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-7 10a7 7 0 0 0 14 0h-2a5 5 0 0 1-10 0H5zm7 9v-2.07A8 8 0 0 0 20 11h-2a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93V20h-3v2h8v-2h-3z"/></svg>
+  </button>
+  <span class="start-label">Toque para gravar</span>
 </div>
 
+<!-- Barra gravando / preview -->
+<div class="recorder" id="recorder">
+  <!-- Lixeira -->
+  <button class="btn-trash" id="btnTrash" title="Cancelar">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+  </button>
+
+  <!-- Dot -->
+  <div class="rec-dot" id="recDot"></div>
+
+  <!-- Timer -->
+  <div class="timer" id="timer">0:00</div>
+
+  <!-- Waveform -->
+  <div class="waveform" id="waveform"></div>
+
+  <!-- Botão mic/pausa (durante gravação) -->
+  <button class="btn-mic" id="btnPause" title="Pausar">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+  </button>
+
+  <!-- Botão velocidade (preview) -->
+  <button class="btn-speed hidden" id="btnSpeed" title="Velocidade">1×</button>
+
+  <!-- Botão play (preview) -->
+  <button class="btn-play hidden" id="btnPlay" title="Play">
+    <svg id="playIcon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+  </button>
+
+  <!-- Enviar -->
+  <button class="btn-send hidden" id="btnSend" title="Enviar">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+  </button>
+</div>
+
+<audio id="audioEl" style="display:none"></audio>
+
 <script>
-var recorder=null, stream=null, chunks=[], blob=null;
+var STATE='idle'; // idle | recording | paused-rec | preview | playing
+var recorder=null,stream=null,chunks=[],blob=null;
+var analyser=null,animFrame=null,audioCtx=null;
+var startTime=0,elapsed=0,timerInt=null;
+var speeds=[1,1.5,2],speedIdx=0;
+var previewWaveData=[];
+var playbackPos=0,playbackInt=null;
+
+var body=document.body;
 var timerEl=document.getElementById('timer');
 var waveEl=document.getElementById('waveform');
-var statusEl=document.getElementById('status');
-var btnRecord=document.getElementById('btnRecord');
-var btnStop=document.getElementById('btnStop');
-var btnCancel=document.getElementById('btnCancel');
+var recDot=document.getElementById('recDot');
+var btnStart=document.getElementById('btnStart');
+var btnTrash=document.getElementById('btnTrash');
+var btnPause=document.getElementById('btnPause');
+var btnSpeed=document.getElementById('btnSpeed');
+var btnPlay=document.getElementById('btnPlay');
 var btnSend=document.getElementById('btnSend');
-var preview=document.getElementById('preview');
-var audioPreview=document.getElementById('audioPreview');
-var timerInt=null, analyser=null, animFrame=null, startTime=0;
+var audioEl=document.getElementById('audioEl');
 
-// cria 30 barras no waveform
-for(var i=0;i<30;i++){var b=document.createElement('div');b.className='bar';b.style.height='4px';waveEl.appendChild(b);}
-var bars=waveEl.querySelectorAll('.bar');
-
-function fmtTimer(s){s=Math.floor(s);return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60;}
-
-function startTimer(){
-  startTime=Date.now();
-  timerInt=setInterval(function(){
-    timerEl.textContent=fmtTimer((Date.now()-startTime)/1000);
-  },200);
+// Cria 44 barras
+var bars=[];
+for(var i=0;i<44;i++){
+  var b=document.createElement('div');
+  b.className='bar';b.style.height='3px';
+  waveEl.appendChild(b);bars.push(b);
 }
-function stopTimer(){clearInterval(timerInt);timerEl.textContent='0:00';}
 
+/* ── Timer ── */
+function fmtTime(s){s=Math.floor(s);return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60;}
+function startTimer(){
+  startTime=Date.now()-elapsed*1000;
+  timerInt=setInterval(function(){
+    elapsed=(Date.now()-startTime)/1000;
+    timerEl.textContent=fmtTime(elapsed);
+  },100);
+}
+function stopTimer(){clearInterval(timerInt);}
+
+/* ── Waveform animado ── */
 function animWave(){
-  if(!analyser) return;
+  if(!analyser)return;
   var buf=new Uint8Array(analyser.frequencyBinCount);
   analyser.getByteFrequencyData(buf);
-  var step=Math.floor(buf.length/30);
-  for(var i=0;i<30;i++){
+  var step=Math.floor(buf.length/44);
+  for(var i=0;i<44;i++){
     var v=buf[i*step]||0;
-    var h=Math.max(4,Math.round((v/255)*44));
+    var h=Math.max(3,Math.round((v/255)*30));
     bars[i].style.height=h+'px';
-    bars[i].style.opacity=0.4+(v/255)*0.6;
+    bars[i].style.opacity=0.5+(v/255)*0.5;
+    // guarda snapshot para preview
+    if(previewWaveData.length<44) previewWaveData[i]=(previewWaveData[i]||3);
+    previewWaveData[i]=Math.round((previewWaveData[i]*0.7)+(h*0.3));
   }
   animFrame=requestAnimationFrame(animWave);
 }
-function resetBars(){ for(var i=0;i<30;i++){ bars[i].style.height='4px'; bars[i].style.opacity='1'; } }
+function stopAnim(){cancelAnimationFrame(animFrame);animFrame=null;}
 
-function show(ids,hideOthers){
-  ['btnRecord','btnStop','btnCancel','btnSend','preview'].forEach(function(id){
-    document.getElementById(id).classList.toggle('hidden', ids.indexOf(id)<0);
-  });
+/* ── Waveform preview estático ── */
+function drawPreview(){
+  waveEl.classList.add('preview');
+  for(var i=0;i<44;i++){
+    var h=previewWaveData[i]||Math.round(3+Math.random()*20);
+    bars[i].style.height=h+'px';
+    bars[i].style.opacity='1';
+    bars[i].classList.remove('played');
+  }
+}
+function updatePlayhead(frac){
+  var cut=Math.round(frac*44);
+  for(var i=0;i<44;i++) bars[i].classList.toggle('played',i<cut);
 }
 
-btnRecord.onclick=function(){
+/* ── Iniciar gravação ── */
+btnStart.onclick=function(){
   navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){
     stream=s;
-    var ctx=new AudioContext();
-    var src=ctx.createMediaStreamSource(s);
-    analyser=ctx.createAnalyser(); analyser.fftSize=64;
+    audioCtx=new AudioContext();
+    var src=audioCtx.createMediaStreamSource(s);
+    analyser=audioCtx.createAnalyser();analyser.fftSize=128;
     src.connect(analyser);
-    recorder=new MediaRecorder(s,{mimeType:MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm'});
-    chunks=[];
-    recorder.ondataavailable=function(e){if(e.data.size>0) chunks.push(e.data);};
+    var mime=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm';
+    recorder=new MediaRecorder(s,{mimeType:mime});
+    chunks=[];previewWaveData=[];elapsed=0;
+    recorder.ondataavailable=function(e){if(e.data.size>0)chunks.push(e.data);};
     recorder.onstop=function(){
       blob=new Blob(chunks,{type:recorder.mimeType||'audio/webm'});
-      audioPreview.src=URL.createObjectURL(blob);
-      show(['btnCancel','btnSend','preview']);
-      statusEl.textContent='Ouça antes de enviar';
-      resetBars(); cancelAnimationFrame(animFrame);
+      audioEl.src=URL.createObjectURL(blob);
+      enterPreview();
     };
     recorder.start(100);
-    startTimer(); animWave();
-    show(['btnCancel','btnStop']);
-    statusEl.textContent='Gravando…';
+    STATE='recording';
+    body.className='recording';
+    startTimer();animWave();
+    // mostra barra de gravação
+    recDot.classList.remove('paused');
+    btnPause.style.display='';
+    btnSpeed.classList.add('hidden');
+    btnPlay.classList.add('hidden');
+    btnSend.classList.add('hidden');
   }).catch(function(e){
-    statusEl.textContent='Microfone não permitido: '+e.message;
+    alert('Microfone não permitido: '+e.message);
   });
 };
 
-btnStop.onclick=function(){
-  if(recorder&&recorder.state==='recording'){recorder.stop();}
-  stopTimer();
-  if(stream) stream.getTracks().forEach(function(t){t.stop();});
+/* ── Pausar / retomar gravação ── */
+btnPause.onclick=function(){
+  if(STATE==='recording'){
+    recorder.pause();
+    stopTimer();stopAnim();
+    recDot.classList.add('paused');
+    // troca ícone para play (retomar)
+    btnPause.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+    STATE='paused-rec';
+  } else if(STATE==='paused-rec'){
+    recorder.resume();
+    startTimer();animWave();
+    recDot.classList.remove('paused');
+    btnPause.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+    STATE='recording';
+  }
 };
 
-btnCancel.onclick=function(){
-  if(recorder&&recorder.state==='recording'){recorder.stop();}
-  stopTimer(); resetBars(); cancelAnimationFrame(animFrame);
+/* ── Parar e ir para preview ── */
+function stopRecording(){
+  if(recorder&&(recorder.state==='recording'||recorder.state==='paused')){
+    recorder.stop();
+  }
+  stopTimer();stopAnim();
   if(stream) stream.getTracks().forEach(function(t){t.stop();});
-  blob=null; chunks=[];
+}
+
+/* ── Entrar no modo preview ── */
+function enterPreview(){
+  STATE='preview';
+  body.className='preview-mode';
+  timerEl.textContent=fmtTime(elapsed);
+  drawPreview();
+  recDot.classList.add('hidden');
+  btnPause.classList.add('hidden');
+  btnSpeed.classList.remove('hidden');
+  btnPlay.classList.remove('hidden');
+  btnSend.classList.remove('hidden');
+}
+
+/* ── Lixeira ── */
+btnTrash.onclick=function(){
+  stopRecording();
+  audioEl.pause();audioEl.src='';
+  clearInterval(playbackInt);
+  blob=null;chunks=[];elapsed=0;previewWaveData=[];
   timerEl.textContent='0:00';
-  show(['btnRecord']);
-  statusEl.textContent='Toque no microfone para gravar';
-  // avisa o pai que cancelou
+  waveEl.classList.remove('preview');
+  for(var i=0;i<44;i++){bars[i].style.height='3px';bars[i].style.opacity='1';bars[i].classList.remove('played');}
+  recDot.classList.remove('hidden','paused');
+  btnPause.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+  STATE='idle';body.className='';
   window.parent.postMessage({type:'wa_audio_cancel'},'*');
 };
 
+/* ── Velocidade ── */
+btnSpeed.onclick=function(){
+  speedIdx=(speedIdx+1)%speeds.length;
+  var s=speeds[speedIdx];
+  btnSpeed.textContent=s+'×';
+  audioEl.playbackRate=s;
+};
+
+/* ── Play / Pause preview ── */
+btnPlay.onclick=function(){
+  if(STATE==='preview'){
+    audioEl.playbackRate=speeds[speedIdx];
+    audioEl.play();
+    STATE='playing';
+    btnPlay.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+    // atualiza playhead
+    playbackInt=setInterval(function(){
+      if(audioEl.duration) updatePlayhead(audioEl.currentTime/audioEl.duration);
+      timerEl.textContent=fmtTime(audioEl.currentTime);
+    },80);
+  } else if(STATE==='playing'){
+    audioEl.pause();
+    STATE='preview';
+    btnPlay.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+    clearInterval(playbackInt);
+  }
+};
+audioEl.onended=function(){
+  STATE='preview';
+  btnPlay.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+  clearInterval(playbackInt);
+  timerEl.textContent=fmtTime(elapsed);
+  updatePlayhead(0);
+};
+
+/* ── Seek no waveform ── */
+waveEl.onclick=function(e){
+  if((STATE==='preview'||STATE==='playing')&&audioEl.duration){
+    var rect=waveEl.getBoundingClientRect();
+    var frac=(e.clientX-rect.left)/rect.width;
+    audioEl.currentTime=frac*audioEl.duration;
+    updatePlayhead(frac);
+    timerEl.textContent=fmtTime(audioEl.currentTime);
+  }
+};
+
+/* ── Enviar ── */
 btnSend.onclick=function(){
   if(!blob) return;
+  // Se estava gravando ainda, para primeiro
+  if(STATE==='recording'||STATE==='paused-rec') stopRecording();
+  if(STATE==='playing'){audioEl.pause();clearInterval(playbackInt);}
   var reader=new FileReader();
   reader.onload=function(e){
     var base64=e.target.result.split(',')[1];
@@ -144,11 +386,13 @@ btnSend.onclick=function(){
       filename:'audio_'+Date.now()+'.webm'
     },'*');
     // reset
-    stopTimer(); resetBars(); cancelAnimationFrame(animFrame);
-    blob=null; chunks=[];
-    timerEl.textContent='0:00';
-    show(['btnRecord']);
-    statusEl.textContent='Enviado! Grave outro se quiser.';
+    blob=null;chunks=[];elapsed=0;previewWaveData=[];speedIdx=0;
+    timerEl.textContent='0:00';btnSpeed.textContent='1×';
+    waveEl.classList.remove('preview');
+    for(var i=0;i<44;i++){bars[i].style.height='3px';bars[i].style.opacity='1';bars[i].classList.remove('played');}
+    recDot.classList.remove('hidden','paused');
+    btnPause.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+    STATE='idle';body.className='';
   };
   reader.readAsDataURL(blob);
 };
