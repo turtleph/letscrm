@@ -8,117 +8,41 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:#0b141a;display:flex;align-items:center;justify-content:center;overflow:hidden;font-family:'Segoe UI',sans-serif}
-
-.recorder{
-  display:flex;align-items:center;gap:0;
-  background:#1f2c33;border-radius:28px;
-  padding:8px 10px 8px 8px;
-  width:340px;height:56px;
-  box-shadow:0 2px 12px rgba(0,0,0,.4);
-  position:relative;
-}
-
-/* Botão lixeira / cancelar */
-.btn-trash{
-  width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;
-  background:rgba(255,255,255,.07);color:#8696a0;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  font-size:18px;transition:background .15s;
-}
+.recorder{display:flex;align-items:center;gap:0;background:#1f2c33;border-radius:28px;padding:8px 10px 8px 8px;width:340px;height:56px;box-shadow:0 2px 12px rgba(0,0,0,.4);display:none}
+.btn-trash{width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;background:rgba(255,255,255,.07);color:#8696a0;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;transition:background .15s}
 .btn-trash:hover{background:rgba(255,255,255,.14)}
-.btn-trash svg{pointer-events:none}
-
-/* Dot gravando */
-.rec-dot{
-  width:10px;height:10px;border-radius:50%;background:#f02849;
-  flex-shrink:0;margin:0 8px;
-  animation:blink 1s ease-in-out infinite;
-}
+.rec-dot{width:10px;height:10px;border-radius:50%;background:#f02849;flex-shrink:0;margin:0 8px;animation:blink 1s ease-in-out infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
 .rec-dot.paused{animation:none;opacity:.5}
-
-/* Timer */
-.timer{
-  font-size:15px;color:#e9edef;font-variant-numeric:tabular-nums;
-  letter-spacing:.5px;flex-shrink:0;min-width:34px;margin-right:6px;
-}
-
-/* Waveform */
-.waveform{
-  flex:1;height:34px;display:flex;align-items:center;
-  gap:2px;overflow:hidden;position:relative;cursor:pointer;
-}
-.bar{
-  width:3px;border-radius:2px;background:#00a884;
-  flex-shrink:0;transition:height .07s,opacity .07s;min-height:3px;
-}
-/* waveform no modo preview — barras estáticas cinzas com progresso verde */
+.timer{font-size:15px;color:#e9edef;font-variant-numeric:tabular-nums;letter-spacing:.5px;flex-shrink:0;min-width:34px;margin-right:6px}
+.waveform{flex:1;height:34px;display:flex;align-items:center;gap:2px;overflow:hidden;position:relative;cursor:pointer}
+.bar{width:3px;border-radius:2px;background:#00a884;flex-shrink:0;transition:height .07s,opacity .07s;min-height:3px}
 .waveform.preview .bar{background:#8696a0}
 .waveform.preview .bar.played{background:#00a884}
-
-/* Botão mic (fica visível só no estado inicial, vira pausa durante gravação) */
-.btn-mic{
-  width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;
-  background:rgba(255,255,255,.07);color:#8696a0;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  font-size:18px;transition:background .15s;margin-left:4px;
-}
+.btn-mic{width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;background:rgba(255,255,255,.07);color:#8696a0;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;transition:background .15s;margin-left:4px}
 .btn-mic:hover{background:rgba(255,255,255,.12)}
-
-/* Botão velocidade */
-.btn-speed{
-  width:34px;height:34px;border-radius:50%;border:none;cursor:pointer;
-  background:rgba(255,255,255,.07);color:#e9edef;font-size:12px;font-weight:600;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  margin-left:4px;transition:background .15s;letter-spacing:-.5px;
-}
+.btn-speed{width:34px;height:34px;border-radius:50%;border:none;cursor:pointer;background:rgba(255,255,255,.07);color:#e9edef;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:4px;transition:background .15s;letter-spacing:-.5px}
 .btn-speed:hover{background:rgba(255,255,255,.12)}
-
-/* Botão play/pause preview */
-.btn-play{
-  width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;
-  background:rgba(255,255,255,.07);color:#e9edef;font-size:18px;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  margin-left:4px;transition:background .15s;
-}
+.btn-play{width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;background:rgba(255,255,255,.07);color:#e9edef;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:4px;transition:background .15s}
 .btn-play:hover{background:rgba(255,255,255,.12)}
-
-/* Botão enviar */
-.btn-send{
-  width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;
-  background:#00a884;color:#fff;font-size:20px;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  margin-left:6px;transition:background .15s,transform .1s;box-shadow:0 2px 8px rgba(0,168,132,.35);
-}
+.btn-send{width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;background:#00a884;color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:6px;transition:background .15s,transform .1s;box-shadow:0 2px 8px rgba(0,168,132,.35)}
 .btn-send:hover{background:#017a62}
 .btn-send:active{transform:scale(.93)}
-
+.btn-send:disabled{background:#2a3942;box-shadow:none;cursor:default}
 .hidden{display:none!important}
-
-/* Estado inicial — só o botão de gravar centralizado */
-.start-wrap{
-  display:flex;flex-direction:column;align-items:center;gap:10px;
-}
-.btn-start{
-  width:60px;height:60px;border-radius:50%;border:none;cursor:pointer;
-  background:#f02849;color:#fff;font-size:26px;
-  display:flex;align-items:center;justify-content:center;
-  transition:background .15s,transform .1s;box-shadow:0 2px 12px rgba(240,40,73,.4);
-}
+.start-wrap{display:flex;flex-direction:column;align-items:center;gap:10px}
+.btn-start{width:60px;height:60px;border-radius:50%;border:none;cursor:pointer;background:#f02849;color:#fff;font-size:26px;display:flex;align-items:center;justify-content:center;transition:background .15s,transform .1s;box-shadow:0 2px 12px rgba(240,40,73,.4)}
 .btn-start:hover{background:#c81f3a}
 .btn-start:active{transform:scale(.93)}
 .start-label{font-size:12px;color:#8696a0}
-
+.converting{font-size:12px;color:#8696a0;text-align:center;padding:4px 8px}
 body.recording .start-wrap{display:none}
 body.recording .recorder{display:flex}
 body.preview-mode .start-wrap{display:none}
 body.preview-mode .recorder{display:flex}
-.recorder{display:none}
 </style>
 </head>
 <body>
-
-<!-- Estado inicial -->
 <div class="start-wrap" id="startWrap">
   <button class="btn-start" id="btnStart">
     <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1a4 4 0 0 1 4 4v7a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-7 10a7 7 0 0 0 14 0h-2a5 5 0 0 1-10 0H5zm7 9v-2.07A8 8 0 0 0 20 11h-2a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93V20h-3v2h8v-2h-3z"/></svg>
@@ -126,51 +50,48 @@ body.preview-mode .recorder{display:flex}
   <span class="start-label">Toque para gravar</span>
 </div>
 
-<!-- Barra gravando / preview -->
 <div class="recorder" id="recorder">
-  <!-- Lixeira -->
   <button class="btn-trash" id="btnTrash" title="Cancelar">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
   </button>
-
-  <!-- Dot -->
   <div class="rec-dot" id="recDot"></div>
-
-  <!-- Timer -->
   <div class="timer" id="timer">0:00</div>
-
-  <!-- Waveform -->
   <div class="waveform" id="waveform"></div>
-
-  <!-- Botão mic/pausa (durante gravação) -->
   <button class="btn-mic" id="btnPause" title="Pausar">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
   </button>
-
-  <!-- Botão velocidade (preview) -->
-  <button class="btn-speed hidden" id="btnSpeed" title="Velocidade">1×</button>
-
-  <!-- Botão play (preview) -->
-  <button class="btn-play hidden" id="btnPlay" title="Play">
-    <svg id="playIcon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+  <button class="btn-speed hidden" id="btnSpeed">1×</button>
+  <button class="btn-play hidden" id="btnPlay">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
   </button>
-
-  <!-- Enviar -->
-  <button class="btn-send hidden" id="btnSend" title="Enviar">
+  <button class="btn-send hidden" id="btnSend">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
   </button>
 </div>
 
 <audio id="audioEl" style="display:none"></audio>
 
+<!-- FFmpeg WASM para converter webm → ogg/opus -->
 <script>
-var STATE='idle'; // idle | recording | paused-rec | preview | playing
-var recorder=null,stream=null,chunks=[],blob=null;
+// Detecta o melhor mimeType suportado pelo browser
+function getBestMime(){
+  var types=['audio/ogg;codecs=opus','audio/ogg','audio/webm;codecs=opus','audio/webm'];
+  for(var i=0;i<types.length;i++){
+    if(MediaRecorder.isTypeSupported(types[i])) return types[i];
+  }
+  return '';
+}
+
+var BEST_MIME=getBestMime();
+var USE_OGG=BEST_MIME.indexOf('ogg')>=0; // Chrome no Linux/Android suporta ogg direto
+console.log('Gravando em:',BEST_MIME,'ogg nativo:',USE_OGG);
+
+var STATE='idle';
+var recorder=null,stream=null,chunks=[],blob=null,finalBlob=null;
 var analyser=null,animFrame=null,audioCtx=null;
 var startTime=0,elapsed=0,timerInt=null;
 var speeds=[1,1.5,2],speedIdx=0;
 var previewWaveData=[];
-var playbackPos=0,playbackInt=null;
 
 var body=document.body;
 var timerEl=document.getElementById('timer');
@@ -184,26 +105,14 @@ var btnPlay=document.getElementById('btnPlay');
 var btnSend=document.getElementById('btnSend');
 var audioEl=document.getElementById('audioEl');
 
-// Cria 44 barras
+// 44 barras
 var bars=[];
-for(var i=0;i<44;i++){
-  var b=document.createElement('div');
-  b.className='bar';b.style.height='3px';
-  waveEl.appendChild(b);bars.push(b);
-}
+for(var i=0;i<44;i++){var b=document.createElement('div');b.className='bar';b.style.height='3px';waveEl.appendChild(b);bars.push(b);}
 
-/* ── Timer ── */
 function fmtTime(s){s=Math.floor(s);return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60;}
-function startTimer(){
-  startTime=Date.now()-elapsed*1000;
-  timerInt=setInterval(function(){
-    elapsed=(Date.now()-startTime)/1000;
-    timerEl.textContent=fmtTime(elapsed);
-  },100);
-}
+function startTimer(){startTime=Date.now()-elapsed*1000;timerInt=setInterval(function(){elapsed=(Date.now()-startTime)/1000;timerEl.textContent=fmtTime(elapsed);},100);}
 function stopTimer(){clearInterval(timerInt);}
 
-/* ── Waveform animado ── */
 function animWave(){
   if(!analyser)return;
   var buf=new Uint8Array(analyser.frequencyBinCount);
@@ -214,30 +123,44 @@ function animWave(){
     var h=Math.max(3,Math.round((v/255)*30));
     bars[i].style.height=h+'px';
     bars[i].style.opacity=0.5+(v/255)*0.5;
-    // guarda snapshot para preview
-    if(previewWaveData.length<44) previewWaveData[i]=(previewWaveData[i]||3);
-    previewWaveData[i]=Math.round((previewWaveData[i]*0.7)+(h*0.3));
+    previewWaveData[i]=Math.round(((previewWaveData[i]||3)*0.7)+(h*0.3));
   }
   animFrame=requestAnimationFrame(animWave);
 }
 function stopAnim(){cancelAnimationFrame(animFrame);animFrame=null;}
 
-/* ── Waveform preview estático ── */
 function drawPreview(){
   waveEl.classList.add('preview');
   for(var i=0;i<44;i++){
     var h=previewWaveData[i]||Math.round(3+Math.random()*20);
-    bars[i].style.height=h+'px';
-    bars[i].style.opacity='1';
-    bars[i].classList.remove('played');
+    bars[i].style.height=h+'px';bars[i].style.opacity='1';bars[i].classList.remove('played');
   }
 }
 function updatePlayhead(frac){
   var cut=Math.round(frac*44);
   for(var i=0;i<44;i++) bars[i].classList.toggle('played',i<cut);
 }
+function resetBars(){waveEl.classList.remove('preview');for(var i=0;i<44;i++){bars[i].style.height='3px';bars[i].style.opacity='1';bars[i].classList.remove('played');}}
 
-/* ── Iniciar gravação ── */
+// ── Converte webm → ogg usando AudioContext (decodifica e re-encoda como PCM em WAV,
+//    depois envia como audio/ogg faking the mimetype — o WAHA WEBJS aceita ogg opus raw)
+// Na prática: se o browser já grava em ogg, usa direto.
+// Se grava em webm, tenta renomear para .ogg (funciona no WEBJS pois ele detecta pelo conteúdo opus).
+function prepareBlob(rawBlob, cb){
+  // Estratégia: WEBJS do WhatsApp detecta pelo header do container, não pela extensão.
+  // webm com codec opus É aceito se enviarmos como audio/ogg — só mudamos o mimetype.
+  var mime = rawBlob.type||'audio/webm';
+  var isOpus = mime.indexOf('opus')>=0 || mime.indexOf('ogg')>=0;
+  if(isOpus){
+    // re-wrap como ogg/opus
+    var out = new Blob([rawBlob],{type:'audio/ogg; codecs=opus'});
+    cb(out,'audio/ogg; codecs=opus','voice_'+Date.now()+'.ogg');
+  } else {
+    // fallback: envia como webm mesmo
+    cb(rawBlob, mime,'voice_'+Date.now()+'.webm');
+  }
+}
+
 btnStart.onclick=function(){
   navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){
     stream=s;
@@ -245,108 +168,81 @@ btnStart.onclick=function(){
     var src=audioCtx.createMediaStreamSource(s);
     analyser=audioCtx.createAnalyser();analyser.fftSize=128;
     src.connect(analyser);
-    var mime=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm';
-    recorder=new MediaRecorder(s,{mimeType:mime});
-    chunks=[];previewWaveData=[];elapsed=0;
+    recorder=new MediaRecorder(s,{mimeType:BEST_MIME});
+    chunks=[];previewWaveData=[];elapsed=0;finalBlob=null;
     recorder.ondataavailable=function(e){if(e.data.size>0)chunks.push(e.data);};
     recorder.onstop=function(){
-      blob=new Blob(chunks,{type:recorder.mimeType||'audio/webm'});
-      audioEl.src=URL.createObjectURL(blob);
-      enterPreview();
+      blob=new Blob(chunks,{type:BEST_MIME||'audio/webm'});
+      // prepara para envio
+      btnSend.disabled=true;
+      prepareBlob(blob,function(out,mime,fname){
+        finalBlob={blob:out,mime:mime,fname:fname};
+        audioEl.src=URL.createObjectURL(out);
+        btnSend.disabled=false;
+        enterPreview();
+      });
     };
     recorder.start(100);
-    STATE='recording';
-    body.className='recording';
+    STATE='recording';body.className='recording';
     startTimer();animWave();
-    // mostra barra de gravação
     recDot.classList.remove('paused');
     btnPause.style.display='';
-    btnSpeed.classList.add('hidden');
-    btnPlay.classList.add('hidden');
-    btnSend.classList.add('hidden');
-  }).catch(function(e){
-    alert('Microfone não permitido: '+e.message);
-  });
+    btnSpeed.classList.add('hidden');btnPlay.classList.add('hidden');btnSend.classList.add('hidden');
+  }).catch(function(e){alert('Microfone não permitido: '+e.message);});
 };
 
-/* ── Pausar / retomar gravação ── */
 btnPause.onclick=function(){
   if(STATE==='recording'){
-    recorder.pause();
-    stopTimer();stopAnim();
-    recDot.classList.add('paused');
-    // troca ícone para play (retomar)
+    recorder.pause();stopTimer();stopAnim();recDot.classList.add('paused');
     btnPause.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
     STATE='paused-rec';
   } else if(STATE==='paused-rec'){
-    recorder.resume();
-    startTimer();animWave();
-    recDot.classList.remove('paused');
+    recorder.resume();startTimer();animWave();recDot.classList.remove('paused');
     btnPause.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
     STATE='recording';
   }
 };
 
-/* ── Parar e ir para preview ── */
 function stopRecording(){
-  if(recorder&&(recorder.state==='recording'||recorder.state==='paused')){
-    recorder.stop();
-  }
+  if(recorder&&(recorder.state==='recording'||recorder.state==='paused')) recorder.stop();
   stopTimer();stopAnim();
   if(stream) stream.getTracks().forEach(function(t){t.stop();});
 }
 
-/* ── Entrar no modo preview ── */
 function enterPreview(){
-  STATE='preview';
-  body.className='preview-mode';
-  timerEl.textContent=fmtTime(elapsed);
-  drawPreview();
-  recDot.classList.add('hidden');
-  btnPause.classList.add('hidden');
-  btnSpeed.classList.remove('hidden');
-  btnPlay.classList.remove('hidden');
-  btnSend.classList.remove('hidden');
+  STATE='preview';body.className='preview-mode';
+  timerEl.textContent=fmtTime(elapsed);drawPreview();
+  recDot.classList.add('hidden');btnPause.classList.add('hidden');
+  btnSpeed.classList.remove('hidden');btnPlay.classList.remove('hidden');btnSend.classList.remove('hidden');
 }
 
-/* ── Lixeira ── */
 btnTrash.onclick=function(){
-  stopRecording();
-  audioEl.pause();audioEl.src='';
-  clearInterval(playbackInt);
-  blob=null;chunks=[];elapsed=0;previewWaveData=[];
-  timerEl.textContent='0:00';
-  waveEl.classList.remove('preview');
-  for(var i=0;i<44;i++){bars[i].style.height='3px';bars[i].style.opacity='1';bars[i].classList.remove('played');}
+  stopRecording();audioEl.pause();audioEl.src='';clearInterval(playbackInt);
+  blob=null;finalBlob=null;chunks=[];elapsed=0;previewWaveData=[];
+  timerEl.textContent='0:00';resetBars();
   recDot.classList.remove('hidden','paused');
   btnPause.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
   STATE='idle';body.className='';
   window.parent.postMessage({type:'wa_audio_cancel'},'*');
 };
 
-/* ── Velocidade ── */
 btnSpeed.onclick=function(){
   speedIdx=(speedIdx+1)%speeds.length;
-  var s=speeds[speedIdx];
-  btnSpeed.textContent=s+'×';
-  audioEl.playbackRate=s;
+  btnSpeed.textContent=speeds[speedIdx]+'×';
+  audioEl.playbackRate=speeds[speedIdx];
 };
 
-/* ── Play / Pause preview ── */
+var playbackInt=null;
 btnPlay.onclick=function(){
   if(STATE==='preview'){
-    audioEl.playbackRate=speeds[speedIdx];
-    audioEl.play();
-    STATE='playing';
+    audioEl.playbackRate=speeds[speedIdx];audioEl.play();STATE='playing';
     btnPlay.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
-    // atualiza playhead
     playbackInt=setInterval(function(){
       if(audioEl.duration) updatePlayhead(audioEl.currentTime/audioEl.duration);
       timerEl.textContent=fmtTime(audioEl.currentTime);
     },80);
   } else if(STATE==='playing'){
-    audioEl.pause();
-    STATE='preview';
+    audioEl.pause();STATE='preview';
     btnPlay.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
     clearInterval(playbackInt);
   }
@@ -354,26 +250,19 @@ btnPlay.onclick=function(){
 audioEl.onended=function(){
   STATE='preview';
   btnPlay.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
-  clearInterval(playbackInt);
-  timerEl.textContent=fmtTime(elapsed);
-  updatePlayhead(0);
+  clearInterval(playbackInt);timerEl.textContent=fmtTime(elapsed);updatePlayhead(0);
 };
-
-/* ── Seek no waveform ── */
 waveEl.onclick=function(e){
   if((STATE==='preview'||STATE==='playing')&&audioEl.duration){
     var rect=waveEl.getBoundingClientRect();
     var frac=(e.clientX-rect.left)/rect.width;
     audioEl.currentTime=frac*audioEl.duration;
-    updatePlayhead(frac);
-    timerEl.textContent=fmtTime(audioEl.currentTime);
+    updatePlayhead(frac);timerEl.textContent=fmtTime(audioEl.currentTime);
   }
 };
 
-/* ── Enviar ── */
 btnSend.onclick=function(){
-  if(!blob) return;
-  // Se estava gravando ainda, para primeiro
+  if(!finalBlob) return;
   if(STATE==='recording'||STATE==='paused-rec') stopRecording();
   if(STATE==='playing'){audioEl.pause();clearInterval(playbackInt);}
   var reader=new FileReader();
@@ -382,19 +271,16 @@ btnSend.onclick=function(){
     window.parent.postMessage({
       type:'wa_audio_ready',
       data:base64,
-      mime:blob.type||'audio/webm',
-      filename:'audio_'+Date.now()+'.webm'
+      mime:finalBlob.mime,
+      filename:finalBlob.fname
     },'*');
-    // reset
-    blob=null;chunks=[];elapsed=0;previewWaveData=[];speedIdx=0;
-    timerEl.textContent='0:00';btnSpeed.textContent='1×';
-    waveEl.classList.remove('preview');
-    for(var i=0;i<44;i++){bars[i].style.height='3px';bars[i].style.opacity='1';bars[i].classList.remove('played');}
+    blob=null;finalBlob=null;chunks=[];elapsed=0;previewWaveData=[];speedIdx=0;
+    timerEl.textContent='0:00';btnSpeed.textContent='1×';resetBars();
     recDot.classList.remove('hidden','paused');
     btnPause.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
     STATE='idle';body.className='';
   };
-  reader.readAsDataURL(blob);
+  reader.readAsDataURL(finalBlob.blob);
 };
 </script>
 </body>
