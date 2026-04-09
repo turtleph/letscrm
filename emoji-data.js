@@ -1,0 +1,1 @@
+var EMOJI_DATA = [];
